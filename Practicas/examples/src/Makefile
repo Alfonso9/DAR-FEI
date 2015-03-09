@@ -4,7 +4,7 @@
 #    wrfifo	- Compilar hello
 
 BIN = ../bin
-EXECUTABLES = wrfifo rdfifo
+EXECUTABLES = wrfifo rdfifo tcpfifo
 # Agregar cabeceras .h
 INCLUDES = 
 #Usar gcc
@@ -21,6 +21,7 @@ all: 	$(EXECUTABLES)
 clean:
 	rm -f $(BIN)/wrfifo *.o
 	rm -f $(BIN)/rdfifo *.o
+	rm -f $(BIN)/tcpfifo *.o
 
 # Compilar los archivos .c
 %.o:%.c $(INCLUDES) 
@@ -32,3 +33,6 @@ wrfifo: wrfifo.o
 
 rdfifo: rdfifo.o
 	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/rdfifo rdfifo.o $(LIBS)
+
+tcpfifo: tcpfifo.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/tcpfifo tcpfifo.o $(LIBS)
