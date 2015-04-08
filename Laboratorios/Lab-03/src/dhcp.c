@@ -117,7 +117,7 @@ int main()
     /* ------- Receiving ----------------*/
         /*------Fill packet---------*/
         //La direccion se debe de cambiar por cada dispositivo
-        inet_aton("192.168.1.102", &recvdhcpmsg.yiaddr);
+        inet_aton("10.2.18.115", &recvdhcpmsg.yiaddr);
         recvdhcpmsg.op = 1;
         recvdhcpmsg.htype = 1;
         recvdhcpmsg.opt[0] = 53;
