@@ -53,8 +53,18 @@ int main(int argc, char * argv[])
 /*----------- Servidor ---------*/
 /*------------------------------*/
 
-	struct atak msg;
-	bzero();
+/*-------- Llenar paquete -------*/
+	struct atak msgAtak;
+	bzero(&msgAtak, sizeof(msgAtak));
+	
+/*-------- Llenar paquete -------*/
+
+	while(1)
+	{
+	/*-------- Receiving ----------*/
+
+	/*-------- Receiving ----------*/
+	}
 
 	return 0;
 }
@@ -66,4 +76,6 @@ void fillAtak(struct * atakmsg)
 	inet_aton("0.0.0.0", &atakmsg.ciaddr);
 	inet_aton("0.0.0.0", &atakmsg.yiaddr);
 	inet_aton("0.0.0.0", &atakmsg.siaddr);
+	strcpy("Hola Oh Shiit",msg);
+   	opt[1] = 1;
 }
