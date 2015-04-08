@@ -28,7 +28,7 @@ struct atak
 #define ATAK_CLIENT_PORT        30001
 #define ATAK_SERVER_PORT        30000
 
-void fillAtak(struct *);
+void fillAtak(struct atak *);
 
 int main(int argc, char * argv[])
 {	
@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
 	if((listensrv = socket(AF_INET, SOCK_DGRAM,0)) < 0)
 		perror("Can't create socket");
 
-	if((bind(listensrv, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
+	if(bind(listensrv, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
 		perror("Can't doing bind");
 /*------------------------------*/
 /*----------- Servidor ---------*/
@@ -70,12 +70,12 @@ int main(int argc, char * argv[])
 }
 
 
-void fillAtak(struct * atakmsg)
+void fillAtak(struct atak * atakmsg)
 {
-	op = 0;
-	inet_aton("0.0.0.0", &atakmsg.ciaddr);
-	inet_aton("0.0.0.0", &atakmsg.yiaddr);
-	inet_aton("0.0.0.0", &atakmsg.siaddr);
-	strcpy("Hola Oh Shiit",msg);
-   	opt[1] = 1;
+	atakmsg->op = 0;
+	inet_aton("0.0.0.0", &atakmsg->ciaddr);
+	inet_aton("0.0.0.0", &atakmsg->yiaddr);
+	inet_aton("0.0.0.0", &atakmsg->siaddr);
+	strcpy("Hola Oh Shiit", atakmsg->msg);
+   	atakmsg->opt[1] = 1;
 }
