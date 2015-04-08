@@ -22,13 +22,14 @@ struct atak
     struct in_addr yiaddr;//Client IP address (if already in use)
     struct in_addr siaddr;//Client IP address (if already in use)
     char msg[300];
-    char opt[1];
+    char opt[2];
 };
 
 #define ATAK_CLIENT_PORT        30001
 #define ATAK_SERVER_PORT        30000
 
 void fillAtak(struct atak *);
+void printAtakMsg(struct atak *);
 
 int main(int argc, char * argv[])
 {	
@@ -53,17 +54,39 @@ int main(int argc, char * argv[])
 /*----------- Servidor ---------*/
 /*------------------------------*/
 
-/*-------- Llenar paquete -------*/
+/*-------- Paquete envío -------*/
 	struct atak msgAtak;
-	bzero(&msgAtak, sizeof(msgAtak));
-	
-/*-------- Llenar paquete -------*/
+	bzero(&msgAtak, sizeof(msgAtak));	
+/*-------- Paquete envío -------*/
+
+/*-------- Paquete recepción ---*/
+	struct atak msgAtakrecv;
+	bzero(&msgAtakrecv, sizeof(msgAtakrecv));	
+/*-------- Paquete recepción ---*/
 
 	while(1)
 	{
+		int serv_len = sizeof(servaddr);
 	/*-------- Receiving ----------*/
-
+		if(recvfrom(listensrv,
+					&msgAtakrecv,
+					sizeof(msgAtakrecv),
+					0,
+					(struct sockaddr*)&servaddr,
+					&serv_len) < 0)
+			perror("Can't receive");
+		printAtakMsg(&msgAtakrecv);
 	/*-------- Receiving ----------*/
+		switch(msgAtakrecv.opt[1])
+		{
+			case 1:
+				printf("%s\n", "Oh Shiit");
+				break;
+			case 2:
+				printf("%s\n", "Visto a tu Visto");
+				break;
+			break;
+		}
 	}
 
 	return 0;
@@ -78,4 +101,18 @@ void fillAtak(struct atak * atakmsg)
 	inet_aton("0.0.0.0", &atakmsg->siaddr);
 	strcpy("Hola Oh Shiit", atakmsg->msg);
    	atakmsg->opt[1] = 1;
+   	atakmsg->opt[1] = 255;
+}
+
+void printAtakMsg(struct atak * msg)
+{
+    printf("=========================\n");
+    printf("OP:     \t%i\n", msg->op);
+    printf("CIADDR: \t%s\n", inet_ntoa(msg->ciaddr));
+    printf("YIADDR: \t%s\n", inet_ntoa(msg->yiaddr));
+    printf("SIADDR: \t%s\n", inet_ntoa(msg->siaddr));
+    printf("Message:\t%s\n", msg->msg);
+    printf("Option: \t%02x\n", msg->opt[1]);
+    printf("		\t%02x\n", msg->opt[2]);
+    printf("=========================\n");
 }
