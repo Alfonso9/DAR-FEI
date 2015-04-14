@@ -5,7 +5,7 @@
 #    client	- Compilar cliente
 
 BIN = ../bin
-EXECUTABLES = atk
+EXECUTABLES = atk clientatk
 # Agregar cabeceras .h
 INCLUDES = 
 #Usar gcc
@@ -20,7 +20,7 @@ all: 	$(EXECUTABLES)
 
 #'make clean' eleminar archivos objetos
 clean:
-	rm -f $(BIN)/atk *.o
+	rm -f $(BIN)/atk  $(BIN)/clientatk *.o
 
 # Compilar los archivos .c
 %.o:%.c $(INCLUDES) 
@@ -29,3 +29,7 @@ clean:
 # Generar ejecutables individuales
 atk: atk.o
 	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/atk atk.o $(LIBS)
+
+clientatk: clientatk.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/clientatk clientatk.o $(LIBS)
+	

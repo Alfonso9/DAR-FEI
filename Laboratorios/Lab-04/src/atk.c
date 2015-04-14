@@ -21,7 +21,7 @@ struct atak
 	struct in_addr ciaddr;//Client IP address (if already in use)
     struct in_addr yiaddr;//Client IP address (if already in use)
     struct in_addr siaddr;//Client IP address (if already in use)
-    char msg[300];
+    char msg[1000];
     char opt[2];
 };
 
@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
 		perror("Can't create socket");
 
 	if(bind(listensrv, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
-		perror("Can't doing bind");
+		perror("Can't to bind");
 /*------------------------------*/
 /*----------- Servidor ---------*/
 /*------------------------------*/
@@ -58,16 +58,16 @@ int main(int argc, char * argv[])
 	struct atak msgAtak;
 	bzero(&msgAtak, sizeof(msgAtak));	
 /*-------- Paquete envío -------*/
-
-/*-------- Paquete recepción ---*/
-	struct atak msgAtakrecv;
-	bzero(&msgAtakrecv, sizeof(msgAtakrecv));	
-/*-------- Paquete recepción ---*/
-
-	while(1)
+	printf("%s\n", "Esperando datos...");
+	while(1)		
 	{
+		/*-------- Paquete recepción ---*/
+		struct atak msgAtakrecv;
+		bzero(&msgAtakrecv, sizeof(msgAtakrecv));	
+		/*-------- Paquete recepción ---*/
+
 		int serv_len = sizeof(servaddr);
-	/*-------- Receiving ----------*/
+		/*-------- Receiving ----------*/
 		if(recvfrom(listensrv,
 					&msgAtakrecv,
 					sizeof(msgAtakrecv),
@@ -75,8 +75,10 @@ int main(int argc, char * argv[])
 					(struct sockaddr*)&servaddr,
 					&serv_len) < 0)
 			perror("Can't receive");
+		
 		printAtakMsg(&msgAtakrecv);
-	/*-------- Receiving ----------*/
+		printf("%i\n", sizeof(msgAtakrecv));		
+		/*-------- Receiving ----------*/
 		switch(msgAtakrecv.opt[1])
 		{
 			case 1:
@@ -99,7 +101,7 @@ void fillAtak(struct atak * atakmsg)
 	inet_aton("0.0.0.0", &atakmsg->ciaddr);
 	inet_aton("0.0.0.0", &atakmsg->yiaddr);
 	inet_aton("0.0.0.0", &atakmsg->siaddr);
-	strcpy("Hola Oh Shiit", atakmsg->msg);
+	strcpy(atakmsg->msg, "Hola Oh Shiit -.-");
    	atakmsg->opt[1] = 1;
    	atakmsg->opt[1] = 255;
 }
@@ -113,6 +115,6 @@ void printAtakMsg(struct atak * msg)
     printf("SIADDR: \t%s\n", inet_ntoa(msg->siaddr));
     printf("Message:\t%s\n", msg->msg);
     printf("Option: \t%02x\n", msg->opt[1]);
-    printf("		\t%02x\n", msg->opt[2]);
+    printf("Option: \t%02x\n", msg->opt[2]);
     printf("=========================\n");
 }
