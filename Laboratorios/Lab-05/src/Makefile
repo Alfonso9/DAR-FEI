@@ -5,7 +5,7 @@
 #    client	- Compilar cliente
 
 BIN = ../bin
-EXECUTABLES = socket
+EXECUTABLES = serv clien
 # Agregar cabeceras .h
 INCLUDES = 
 #Usar gcc
@@ -20,14 +20,16 @@ all: 	$(EXECUTABLES)
 
 #'make clean' eleminar archivos objetos
 clean:
-	rm -f $(BIN)/socket *.o
+	rm -f $(BIN)/serv $(BIN)/clien *.o
 
 # Compilar los archivos .c
 %.o:%.c $(INCLUDES) 
 	$(GCC) $(FLAGS) $(CFLAGS) -c $<
 
 # Generar ejecutables individuales
-socket: socket.o
-	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/socket socket.o $(LIBS)
+serv: serv.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/serv serv.o $(LIBS)
 
+clien: clien.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/clien clien.o $(LIBS)
 	
