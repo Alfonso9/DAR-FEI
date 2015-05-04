@@ -17,12 +17,10 @@
 
 struct atak
 {
-	uint8_t op; //Message opcode/type
+	/*int8_t op; //Message opcode/type
 	struct in_addr ciaddr;//Client IP address (if already in use)
-	struct in_addr yiaddr;//Client IP address (if already in use)
-	struct in_addr siaddr;//Client IP address (if already in use)
-	char msg[1000];
-	char opt[2];	
+	struct in_addr yiaddr;//Client IP address (if already in use)*/
+	char msg[100];
 };
 
 #define ATAK_CLIENT_PORT 30001
@@ -97,24 +95,18 @@ int main(int argc, char * argv[])
 
 void fillAtak(struct atak * atakmsg)
 {
-	atakmsg->op = 0;
+	/*atakmsg->op = 0;
 	inet_aton("0.0.0.0", &atakmsg->ciaddr);
-	inet_aton("0.0.0.0", &atakmsg->yiaddr);
-	inet_aton("0.0.0.0", &atakmsg->siaddr);
-	strcpy(atakmsg->msg, "Hola Oh Shiit -.-lsdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuygdfñhganidygliubdcgilueybgiuyg");
-   	atakmsg->opt[1] = 1;
-   	atakmsg->opt[2] = 2;
+	inet_aton("0.0.0.0", &atakmsg->yiaddr);*/
+	strcpy(atakmsg->msg, "-.-");
 }
 
 void printAtakMsg(struct atak * msg)
 {
 	printf("=========================\n");
-	printf("OP: \t%i\n", msg->op);
+	/*printf("OP: \t%i\n", msg->op);
 	printf("CIADDR: \t%s\n", inet_ntoa(msg->ciaddr));
-	printf("YIADDR: \t%s\n", inet_ntoa(msg->yiaddr));
-	printf("SIADDR: \t%s\n", inet_ntoa(msg->siaddr));
+	printf("YIADDR: \t%s\n", inet_ntoa(msg->yiaddr));*/
 	printf("Message:\t%s\n", msg->msg);
-	printf("Option: \t%i\n", msg->opt[1]);
-	printf("	\t%i\n", msg->opt[2]);
 	printf("=========================\n");
 }

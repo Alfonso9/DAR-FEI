@@ -5,7 +5,7 @@
 #    client	- Compilar cliente
 
 BIN = ../bin
-EXECUTABLES = atk clientatk
+EXECUTABLES = socket
 # Agregar cabeceras .h
 INCLUDES = 
 #Usar gcc
@@ -20,16 +20,14 @@ all: 	$(EXECUTABLES)
 
 #'make clean' eleminar archivos objetos
 clean:
-	rm -f $(BIN)/atk  $(BIN)/clientatk *.o
+	rm -f $(BIN)/socket *.o
 
 # Compilar los archivos .c
 %.o:%.c $(INCLUDES) 
 	$(GCC) $(FLAGS) $(CFLAGS) -c $<
 
 # Generar ejecutables individuales
-atk: atk.o
-	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/atk atk.o $(LIBS)
+socket: socket.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/socket socket.o $(LIBS)
 
-clientatk: clientatk.o
-	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/clientatk clientatk.o $(LIBS)
 	
