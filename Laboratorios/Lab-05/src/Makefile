@@ -5,7 +5,7 @@
 #    client	- Compilar cliente
 
 BIN = ../bin
-EXECUTABLES = serv clien
+EXECUTABLES = serv clien atk clientatk
 # Agregar cabeceras .h
 INCLUDES = 
 #Usar gcc
@@ -20,7 +20,7 @@ all: 	$(EXECUTABLES)
 
 #'make clean' eleminar archivos objetos
 clean:
-	rm -f $(BIN)/serv $(BIN)/clien *.o
+	rm -f $(BIN)/serv $(BIN)/clien $(BIN)/atk $(BIN)/clientatk *.o
 
 # Compilar los archivos .c
 %.o:%.c $(INCLUDES) 
@@ -33,3 +33,8 @@ serv: serv.o
 clien: clien.o
 	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/clien clien.o $(LIBS)
 	
+atk: atk.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/atk atk.o $(LIBS)
+
+clientatk: clientatk.o
+	$(GCC) $(FLAGS) $(CFLAGS) -o $(BIN)/clientatk clientatk.o $(LIBS)	
