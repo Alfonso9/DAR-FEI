@@ -1,0 +1,1 @@
+Se realizó la instalación de XenServer en el cual se instalaron diferentes Sistemas Operativos, en una PC del Centro de Computo de la FEI.
