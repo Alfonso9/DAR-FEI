@@ -27,7 +27,8 @@ int main(int argc, char * argv[])
     struct sockaddr_in serv_addr;
     struct hostent * server;
     char buffer[101];
-    struct atak msgAtak;
+    struct atak msgAtakrecv;
+    
 	/*------------------------------*/
 	/*----------- Cliente ----------*/
 	/*------------------------------*/
@@ -61,86 +62,117 @@ int main(int argc, char * argv[])
 	bool cond = true;
 	while(cond)
     {
-    	bzero(&msgAtak, sizeof(msgAtak));
-    	printf("Please enter the message: ");
-    	/*------------------------------*/
-		/*----------- Envío ------------*/
-		/*------------------------------*/
-		int op;
-		scanf ("%d",&op);
+    	printf("%s\n", "Esperando datos...");		
+		/*-------- Paquete Recibido -------*/			
+		bzero(&msgAtakrecv, sizeof(struct atak));		
+		/*-------- Paquete Recibido -------*/
+		
+		/*-------- Recibiendo ----------*/
+		bzero(buffer, 101);
+		n = read(sockfd,buffer,101);
+		if (n < 0)
+		{ 
+            perror("ERROR reading from socket");
+            exit(1);
+        }
+		memcpy(&msgAtakrecv, buffer, (int) sizeof(msgAtakrecv));					
+		/*-------- Recibiendo ----------*/
 
-    	switch(op)
+		switch(msgAtakrecv.type)
 		{
 			case 1:
-				msgAtak.type = 1;
-				printf("Tamaño: %i\n", (int) sizeof(msgAtak));
-				printf("%s\n", "GET");				
-				memcpy(buffer, &msgAtak, sizeof(msgAtak));
-				n = write(sockfd,buffer,strlen(buffer));
+				printf("Tamaño: %i\n", (int) sizeof(msgAtakrecv));		
+				printAtakMsg(&msgAtakrecv);
+				printf("%s\n", "GET");
+				/*------------------------------------------*/
+				/*int socket_desc;
+				struct sockaddr_in servget;
+				char * message, servreq[1000];
+
+				//create socket
+				socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+				if(socket_desc == -1)
+				{
+					printf("%s\n", "Error create socket");
+				}
+
+				servget.sin_addr.s_addr = inet_addr("216.58.216.238");//216.58.216.238
+				servget.sin_family = AF_INET;
+				servget.sin_port = htons(80);
+
+				if (connect(socket_desc,(struct sockaddr *) &servget,sizeof(servget)) < 0) 
+			    {
+			        perror("ERROR connecting");
+			        return 1;
+			    }
+
+			    message = "GET / HTTP/1.1\r\n\r\n";
+
+			    if(send(socket_desc, message, strlen(message), 0) < 0)
+			    {
+			    	perror("ERROR connecting");
+			        return 1;
+			    }
+
+			    if(recv(socket_desc, servreq, 2000, 0) < 0)
+			    {
+			    	perror("Recv Failed");
+			    }
+
+			    //puts(servreq);
+			    close(socket_desc);*/
+				/*------------------------------------------*/
+				strcpy(msgAtakrecv.msg, "<HTML><HEAD><TITLE></TITLE></HEAD><BODYBGCOLOR='#FFFFFF'><TABLEBORDER=0ALIGN=CENTERWIDTH=100%><TR><");
+				//strcpy(msgAtakrecv.msg, message);				
+				memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));
+				usleep(20);
+				n = write(sockfd, buffer, sizeof(msgAtakrecv));
 		        if (n < 0)
 		        { 
 		            perror("ERROR writing to socket");
 		            exit(1);
 				}
-				printf("%s\n", "Recibiendo...");
-				n = read(sockfd,buffer,101);
-		        if (n < 0)
-		        { 
-		             perror("ERROR reading from socket");
-		             exit(1);
-		        }
-		        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
-		        printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);
 				break;
 			case 2:
-				msgAtak.type = 2;
-				printf("Tamaño: %i\n", (int) sizeof(msgAtak));
-				printf("%s\n", "IP'S");				
-				memcpy(buffer, &msgAtak, sizeof(msgAtak));
-				n = write(sockfd,buffer,strlen(buffer));
+				printf("Tamaño: %i\n", (int) sizeof(msgAtakrecv));		
+				printAtakMsg(&msgAtakrecv);
+				printf("%s\n", "IP'S");
+				strcpy(msgAtakrecv.msg, "IP'S");
+				memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));
+				n = write(sockfd, buffer, sizeof(msgAtakrecv));
 		        if (n < 0)
 		        { 
 		            perror("ERROR writing to socket");
 		            exit(1);
 				}
-				printf("%s\n", "Recibiendo...");
-				n = read(sockfd,buffer,101);
-		        if (n < 0)
-		        { 
-		             perror("ERROR reading from socket");
-		             exit(1);
-		        }
-		        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
-		        printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);
 				break;
-			case 3:
+			/*case 3:
 				cond = false;
-				msgAtak.type = 3;
-				printf("Tamaño: %i\n", (int) sizeof(msgAtak));
-				printf("%s\n", "Bye");				
-				memcpy(buffer, &msgAtak, sizeof(msgAtak));
-				n = write(sockfd,buffer,strlen(buffer));
+				printf("Tamaño: %i\n", (int) sizeof(msgAtakrecv));		
+				printAtakMsg(&msgAtakrecv);
+				printf("%s\n", "Bye");
+				strcpy(msgAtakrecv.msg, "Bye");
+				memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));
+				n = write(sockfd, buffer, sizeof(msgAtakrecv));
 		        if (n < 0)
 		        { 
 		            perror("ERROR writing to socket");
 		            exit(1);
 				}
-				printf("%s\n", "Recibiendo...");
-				n = read(sockfd,buffer,101);
-		        if (n < 0)
-		        { 
-		             perror("ERROR reading from socket");
-		             exit(1);
-		        }
-		        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
-		        printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);
-				break;
-			
+				break;*/
+			printf("Tamaño: %i\n", (int) sizeof(msgAtakrecv));		
+			printAtakMsg(&msgAtakrecv);
+			printf("%s\n", "DESCONOCIDO");
+			strcpy(msgAtakrecv.msg, "DESCONOCIDO");
+			memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));
+			n = write(sockfd, buffer, sizeof(msgAtakrecv));
+	        if (n < 0)
+	        { 
+	            perror("ERROR writing to socket");
+	            exit(1);
+			}
 			break;
-		}        		
-	    /*------------------------------*/
-		/*----------- Envío ------------*/
-		/*------------------------------*/
+		}
     }
 	return 0;	
 }
