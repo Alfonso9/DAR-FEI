@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdbool.h>
+#include "libscan.h"
 
 struct atak
 {
@@ -18,17 +19,11 @@ struct atak
 
 void printAtakMsg(struct atak *);
 char * GET();
+char * SCANIPS();
 struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo);
 
 int main(int argc, char * argv[])
 {	
-	struct hostent *lh = gethostbyname("www.scopus.com");
-
-    if (lh)
-        printf("IP: %s\n", inet_ntoa(lh->h_addr));
-    else
-        herror("gethostbyname");
-
 	if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -63,8 +58,7 @@ int main(int argc, char * argv[])
     serv_addr.sin_port = htons(portno);
 
     while(true)
-    {
-    	usleep(5000000);
+    {    	
 	    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
 	    {
 	        perror("ERROR connecting");
@@ -82,8 +76,8 @@ int main(int argc, char * argv[])
 			/*-------- Paquete Recibido -------*/
 			
 			/*-------- Recibiendo ----------*/
-			bzero(buffer, 101);
-			n = read(sockfd,buffer,101);
+			bzero(buffer, 103);
+			n = read(sockfd,buffer,103);
 			if (n < 0)
 			{ 
 	            perror("ERROR reading from socket");
@@ -178,16 +172,86 @@ int main(int argc, char * argv[])
 					}					
 					break;
 				case 2:
+					printf("%s\n", "Procesando solicitud...");
 					printf("Tamaño: %i\n", (int) sizeof(msgAtakrecv));		
 					printAtakMsg(&msgAtakrecv);
-					printf("%s\n", "IP'S");
-					strcpy(msgAtakrecv.msg, "IP'S");
-					memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));
-					n = write(sockfd, buffer, sizeof(msgAtakrecv));
-			        if (n < 0)
-			        { 
-			            perror("ERROR writing to socket");
-			            exit(1);
+					printf("%s\n", "SCAN IP'S");
+					/*------------------------------------------*/
+					char * messageb = SCANIPS();	
+					int ib;
+					struct atak ** arregloatkb = partirMensaje(message, 1, &i);		
+					free(messageb);
+					printf("%i\n", ib);
+					/*------------------------------------------*/	
+					bool enteradob = false;
+					while(!enteradob)
+					{			
+						/*Respondiendo con ACK a Solicitud*/
+						printf("%s\n", "Respondiendo con ACK solicitud...");
+						msgAtakrecv.type = 1;
+						msgAtakrecv.count = ib;
+						msgAtakrecv.ack = 1;
+						strncpy(msgAtakrecv.msg, "Respondiendo", 12);				
+						memcpy(buffer, &msgAtakrecv, sizeof(msgAtakrecv));				
+						n = write(sockfd, buffer, sizeof(msgAtakrecv));
+						if (n < 0)
+				        { 
+				            perror("ERROR writing to socket");
+				            exit(1);
+						}
+						/*Respondiendo con ACK a Solicitud*/
+						/*Recibiendo ACK de enterado*/
+						printf("%s\n", "Recibiendo ACK de enterado...");
+						bzero(buffer, 103);
+						n = read(sockfd,buffer,103);
+						if (n < 0)
+						{ 
+				            perror("ERROR reading from socket");
+				            exit(1);
+				        }
+				        bzero(&msgAtakrecv, sizeof(struct atak));	
+						memcpy(&msgAtakrecv, buffer, (int) sizeof(msgAtakrecv));
+						/*Recibiendo ACK de enterado*/
+						printAtakMsg(&msgAtakrecv);
+						printf("%s\n", "Enviando paquetes...");
+						if (msgAtakrecv.ack == 1)
+						{
+							enteradob = true;
+							int jb = 0;
+							while(jb < i)
+							{			
+								usleep(1);
+								//printf("Mensaje %i: %s\n", j,arregloatk[j]->msg);		
+								struct atak msgAtak;
+								memcpy(&msgAtak, arregloatk[jb], (int) 103);
+								printAtakMsg(&msgAtak);
+								memcpy(buffer, &msgAtak, (int) 103);
+								struct atak msgAtaka;
+								memcpy(&msgAtaka, buffer, (int) 103);				
+								//printAtakMsg(&msgAtaka);
+								n = write(sockfd, buffer, 103);
+								//printf("WRITE RETURN: %i BUFFER: %s\n", n, buffer);
+						        if (n < 0)
+						        { 
+						            perror("ERROR writing to socket");
+						            exit(1);
+								}
+								bzero(buffer, 103);
+								n = read(sockfd, buffer, 103);
+								if (n < 0)
+								{ 
+						            perror("ERROR reading from socket");
+						            exit(1);
+						        }
+						        bzero(&msgAtakrecv, sizeof(struct atak));	
+								memcpy(&msgAtakrecv, buffer, (int) sizeof(msgAtakrecv));
+								printAtakMsg(&msgAtakrecv);
+								if (msgAtakrecv.ack == 1)
+								{
+									jb++;
+								}
+							}	
+						}
 					}
 					break;
 				case 3:
@@ -207,9 +271,12 @@ int main(int argc, char * argv[])
 					}*/
 					break;
 				default:
-					break;
+					cond = false;
+					continue;
 			}
 	    }
+	    close(sockfd);
+		usleep(5000000);
 	}
 	return 0;	
 }
@@ -291,4 +358,11 @@ struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo)
 	}*/
 	*tamArreglo = partes;
 	return arreglo;
+}
+
+char * SCANIPS()
+{	
+	scanIPS();
+	char * servreq = malloc(10000);	
+    return servreq;
 }

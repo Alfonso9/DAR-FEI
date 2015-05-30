@@ -36,31 +36,32 @@ int main(int argc, char * argv[])
 	/*------------------------------*/
 	/*----------- Servidor ---------*/
 	/*------------------------------*/
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	while(true)
+    {
+		sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	    
+	    if (sockfd < 0)
+	    {
+	        perror("ERROR opening socket");
+	        exit(1);
+	    }
+
+	    portno = atoi(argv[1]);
+	    serv_addr.sin_port = htons(portno);
+	    serv_addr.sin_family = AF_INET;
+	    serv_addr.sin_addr.s_addr = INADDR_ANY;    
+
+	    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
+	    {
+	        perror("ERROR on binding");
+	        exit(1);
+	    }
+
+	    listen(sockfd,1);
+		/*------------------------------*/
+		/*----------- Servidor ---------*/
+		/*------------------------------*/
     
-    if (sockfd < 0)
-    {
-        perror("ERROR opening socket");
-        exit(1);
-    }
-
-    portno = atoi(argv[1]);
-    serv_addr.sin_port = htons(portno);
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;    
-
-     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
-    {
-        perror("ERROR on binding");
-        exit(1);
-    }
-
-    listen(sockfd,1);
-	/*------------------------------*/
-	/*----------- Servidor ---------*/
-	/*------------------------------*/
-    while(true)
-    {
 	    /*------------------------------*/
 		/*----------- Cliente ----------*/
 		/*------------------------------*/    
@@ -78,16 +79,79 @@ int main(int argc, char * argv[])
 	    bool cond = true;
 		char * msj = NULL;
 		char * pointer = NULL;
+
+
 		while(cond)		
-		{
-			bzero(&msgAtak, sizeof(msgAtak));
-	    	printf("Please enter the message: ");
+		{			
 	    	/*------------------------------*/
 			/*----------- Envío ------------*/
 			/*------------------------------*/
 			
-			int op;
-			scanf ("%d",&op);		
+			/********* Recibiendo de la INTERFAZ ***************/
+        	int sockdvc, newsockdvc, portnodvc, ndvc;
+		    socklen_t clilent;
+		    struct sockaddr_in serv_addrdvc, cli_addrdvc;				    
+
+		    bzero((char *) &serv_addrdvc, sizeof(serv_addrdvc));
+			/*------------------------------*/
+			/*----------- Servidor ---------*/
+			/*------------------------------*/
+			sockdvc = socket(AF_INET, SOCK_STREAM, 0);
+		    
+		    if (sockdvc < 0)
+		    {
+		        perror("ERROR opening socket INTERFAZ");
+		        exit(1);
+		    }
+
+		    portnodvc = 10000;
+		    serv_addrdvc.sin_port = htons(portnodvc);
+		    serv_addrdvc.sin_family = AF_INET;
+		    serv_addrdvc.sin_addr.s_addr = INADDR_ANY;    
+
+		     if (bind(sockdvc, (struct sockaddr *) &serv_addrdvc, sizeof(serv_addrdvc)) < 0) 
+		    {
+		        perror("ERROR on binding INTERFAZ");
+		        exit(1);
+		    }
+
+		    listen(sockdvc,1);
+			/*------------------------------*/
+			/*----------- Servidor ---------*/
+			/*------------------------------*/
+
+		    /*------------------------------*/
+			/*----------- Cliente ----------*/
+			/*------------------------------*/    
+		    clilent = sizeof(cli_addrdvc);
+		    newsockdvc = accept(sockdvc, (struct sockaddr *) &cli_addrdvc, &clilent);
+		    if (newsockdvc < 0) 
+		    {
+		          perror("ERROR on accept INTERFAZ");
+		          exit(1);
+		    }
+			printf("%s\n", "Cliente conectado");
+
+		    /*Recibiendo Solicitud desde INTERFAZ*/
+			printf("%s\n", "Recibiendo ACK...");				
+			n = read(newsockdvc,buffer,103);
+	        if (n < 0)
+	        { 
+				perror("ERROR reading from socket");
+				exit(1);
+	        }	        
+	        bzero(&msgAtak, sizeof(msgAtak));
+	        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
+
+	        close(sockdvc);	
+	    	close(newsockdvc);
+			/*Recibiendo Solicitud desde INTERFAZ*/
+
+	        /********* Recibiendo de la INTERFAZ ***************/
+	        
+			int op = msgAtak.type;			
+			bzero(&msgAtak, sizeof(msgAtak));	
+			printf("OP is: %i\n", op);
 	    	switch(op)
 			{
 				case 1:				
@@ -121,6 +185,16 @@ int main(int argc, char * argv[])
 			        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
 			        /*Recibiendo ACK de solicitud recibida*/
 
+					/**RESPUESTA A INTERFAZ*/
+					/*n = write(newsockdvc, buffer, sizeof(buffer));							
+			        if (n < 0)
+			        { 
+			            perror("ERROR writing to socket INTERFAZ");
+			            exit(1);
+					}*/	
+										    							
+					/**RESPUESTA A INTERFAZ*/
+
 			        printAtakMsg(&msgAtak);		
 			        /*Comprobando el ACK y preparandose para recibir*/
 			        if(msgAtak.ack == 1)
@@ -142,23 +216,37 @@ int main(int argc, char * argv[])
 				        { 
 				            perror("ERROR writing to socket");
 				            exit(1);
-						}					
+						}				
 						/*Enviando ACK de Enterado*/
+						
 
 						/*Recibiendo paquetes segun el numero a recibir*/
 						printf("%s\n", "Recibiendo mensajes...");
 						msj = malloc((sizeof(msgAtak.msg)*count));
+						
+
 			        	for (i = 0; i < count; ++i)
 			        	{			        		
 			        		usleep(1);
 			        		printf("Recibiendo mensaje %i de %i.\n", i+1, count);				
-							n = read(newsockfd,buffer,103);
-							printf("WRITE RETURN: %i\n", n);
+							n = read(newsockfd,buffer,103);													
 					        if (n < 0)
 					        { 
 					             perror("ERROR reading from socket");
 					             exit(1);
-					        }
+					        }					        
+
+					        /**RESPUESTA A INTERFAZ*/
+							/*n = write(newsockdvc, buffer, sizeof(buffer));							
+					        if (n < 0)
+					        { 
+					            perror("ERROR writing to socket INTERFAZ");
+					            exit(1);
+							}*/																			
+							/**RESPUESTA A INTERFAZ*/
+
+							printf("WRITE RETURN: %i\n", n);
+
 					        bzero(&msgAtak, sizeof(msgAtak));
 					        memcpy(&msgAtak, buffer, (int) 103);
 					        printAtakMsg(&msgAtak);		
@@ -185,91 +273,142 @@ int main(int argc, char * argv[])
 								}
 								/*Enviando de Enterado*/
 			        		}
-			        	}
+			        	}			        	
 			        	/*Recibiendo paquetes segun el numero a recibir*/
 
 			        	msj -= (count * 100);
 			        	printf("Mensaje: %s\n", msj);
 
-
-			        	/********* Enviando al navegador ***************/
-			        	int sockfdd, newsockfdd, portnoo, nd;
-					    socklen_t clilent;
-					    struct sockaddr_in serv_addrr, cli_addrr;				    
-
-					    bzero((char *) &serv_addrr, sizeof(serv_addrr));
-						/*------------------------------*/
-						/*----------- Servidor ---------*/
-						/*------------------------------*/
-						sockfdd = socket(AF_INET, SOCK_STREAM, 0);
-					    
-					    if (sockfdd < 0)
-					    {
-					        perror("ERROR opening socket");
-					        exit(1);
-					    }
-
-					    portnoo = 10000;
-					    serv_addrr.sin_port = htons(portnoo);
-					    serv_addrr.sin_family = AF_INET;
-					    serv_addrr.sin_addr.s_addr = INADDR_ANY;    
-
-					     if (bind(sockfdd, (struct sockaddr *) &serv_addrr, sizeof(serv_addrr)) < 0) 
-					    {
-					        perror("ERROR on binding");
-					        exit(1);
-					    }
-
-					    listen(sockfdd,1);
-						/*------------------------------*/
-						/*----------- Servidor ---------*/
-						/*------------------------------*/
-
-					    /*------------------------------*/
-						/*----------- Cliente ----------*/
-						/*------------------------------*/    
-					    clilent = sizeof(cli_addrr);
-					    newsockfdd = accept(sockfdd, (struct sockaddr *) &cli_addrr, &clilent);
-					    if (newsockfdd < 0) 
-					    {
-					          perror("ERROR on accept");
-					          exit(1);
-					    }
-						/*------------------------------*/
-						/*----------- Cliente ----------*/
-						/*------------------------------*/
-					    nd = write(newsockfdd,msj,strlen(msj));							
-				        if (nd < 0)
-				        { 
-				            perror("ERROR writing to socket");
-				            exit(1);
-						}				
-						close(newsockfdd);
-    					close(sockfdd);
-			        	/********* Enviando al navegador ***************/
-			        }		        
+			        }		        			        			        
 			        //printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);		        
 					break;
 				case 2:
+					/*Enviando solicitud*/
+					printf("%s\n", "Enviando solicitud...");
 					msgAtak.type = 2;
+					msgAtak.count = 1;
+					msgAtak.ack = 0;
+					strncpy(msgAtak.msg, "Solicitando", 12);
 					printf("Tamaño: %i\n", (int) sizeof(msgAtak));
-					printf("%s\n", "IP'S");				
+					printf("%s\n", "SCAN IP'S");				
 					memcpy(buffer, &msgAtak, sizeof(msgAtak));
-					n = write(newsockfd,buffer,strlen(buffer));
+					n = write(newsockfd,buffer,strlen(buffer));							
 			        if (n < 0)
 			        { 
 			            perror("ERROR writing to socket");
 			            exit(1);
-					}
-					printf("%s\n", "Recibiendo...");
-					n = read(newsockfd,buffer,101);
+					}				
+					/*Enviando solicitud*/
+
+
+					/*Recibiendo ACK de solicitud recibida*/
+					printf("%s\n", "Recibiendo ACK...");				
+					n = read(newsockfd,buffer,103);
 			        if (n < 0)
 			        { 
 			             perror("ERROR reading from socket");
 			             exit(1);
 			        }
+			        bzero(&msgAtak, sizeof(msgAtak));
 			        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
-			        printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);
+			        /*Recibiendo ACK de solicitud recibida*/
+
+					/**RESPUESTA A INTERFAZ*/
+					/*n = write(newsockdvc, buffer, sizeof(buffer));							
+			        if (n < 0)
+			        { 
+			            perror("ERROR writing to socket INTERFAZ");
+			            exit(1);
+					}*/	
+										    							
+					/**RESPUESTA A INTERFAZ*/
+
+			        printAtakMsg(&msgAtak);		
+			        /*Comprobando el ACK y preparandose para recibir*/
+			        if(msgAtak.ack == 1)
+			        {
+			        	int ib, countb = msgAtak.count;
+			        	char * mensajeb = malloc(countb * 100);
+			        	printf("Tamaño de msj: %s\n", mensajeb);	
+
+			        	/*Enviando ACK de Enterado*/
+			        	printf("%s\n", "Enviando ACK de Enterado..");		        	
+			        	msgAtak.type = 1;
+						msgAtak.count = 1;
+						msgAtak.ack = 1;
+						strncpy(msgAtak.msg, "Enterado", 11);
+						memcpy(buffer, &msgAtak, sizeof(msgAtak));
+						printAtakMsg(&msgAtak);
+						n = write(newsockfd,buffer,strlen(buffer));
+				        if (n < 0)
+				        { 
+				            perror("ERROR writing to socket");
+				            exit(1);
+						}				
+						/*Enviando ACK de Enterado*/
+						
+
+						/*Recibiendo paquetes segun el numero a recibir*/
+						printf("%s\n", "Recibiendo mensajes...");
+						msj = malloc((sizeof(msgAtak.msg)*countb));
+						
+
+			        	for (ib = 0; ib < countb; ++ib)
+			        	{			        		
+			        		usleep(1);
+			        		printf("Recibiendo mensaje %i de %i.\n", ib+1, countb);				
+							n = read(newsockfd,buffer,103);													
+					        if (n < 0)
+					        { 
+					             perror("ERROR reading from socket");
+					             exit(1);
+					        }					        
+
+					        /**RESPUESTA A INTERFAZ*/
+							/*n = write(newsockdvc, buffer, sizeof(buffer));							
+					        if (n < 0)
+					        { 
+					            perror("ERROR writing to socket INTERFAZ");
+					            exit(1);
+							}*/																			
+							/**RESPUESTA A INTERFAZ*/
+
+							printf("WRITE RETURN: %i\n", n);
+
+					        bzero(&msgAtak, sizeof(msgAtak));
+					        memcpy(&msgAtak, buffer, (int) 103);
+					        printAtakMsg(&msgAtak);		
+
+					        printf("Copiando: %i\n", sizeof(msgAtak.msg)); 
+					        strncpy(msj, msgAtak.msg, 100);				        				        
+					        msj += sizeof(msgAtak.msg);
+					        
+					        usleep(1);
+					        if(msgAtak.ack == 0)
+			        		{
+			        			/*Enviando de Enterado*/
+					        	msgAtak.type = 1;
+								msgAtak.count = 1;
+								msgAtak.ack = 1;
+								bzero(msgAtak.msg, sizeof(msgAtak.msg));
+								strncpy(msgAtak.msg, "Recibido", 8);
+								memcpy(buffer, &msgAtak, sizeof(msgAtak));
+								n = write(newsockfd,buffer,strlen(buffer));
+						        if (n < 0)
+						        { 
+						            perror("ERROR writing to socket");
+						            exit(1);
+								}
+								/*Enviando de Enterado*/
+			        		}
+			        	}			        	
+			        	/*Recibiendo paquetes segun el numero a recibir*/
+
+			        	msj -= (countb * 100);
+			        	printf("Mensaje: %s\n", msj);
+
+			        }		        			        			        
+			        //printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);		        
 					break;
 				case 3:
 					//cond = false;
@@ -294,17 +433,17 @@ int main(int argc, char * argv[])
 			        printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);
 					break;
 				default:
+					cond = false;
 					break;			
 			}   		     		
 		    /*------------------------------*/
 			/*----------- Envío ------------*/
-			/*------------------------------*/
-
-			
+			/*------------------------------*/			
 		}	
-	}
-	close(newsockfd);
-    close(sockfd);
+		
+		close(newsockfd);
+		close(sockfd);
+	}    
 	return 0;
 }
 

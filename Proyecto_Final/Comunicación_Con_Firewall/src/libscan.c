@@ -3,13 +3,13 @@
 #include <errno.h> /*Define macros que reciben y reportan errores*/ 
 #include <netdb.h> /*Definiciones para operaciones de base de datos de red*/
 #include <stdio.h> /*Define 3 tipos de variables, varias macros y varias funciones para 
-						desempeñar la entrada y salida.*/
+                        desempeñar la entrada y salida.*/
 #include <stdlib.h> /*Define 4 tipos de variables, varias macros y funciones para dsempeñar
-					funciones generales. Por ejemplo: malloc: "Permite solicitar memoria al 
-					sistema devolviendo un apuntador a esta."*/
+                    funciones generales. Por ejemplo: malloc: "Permite solicitar memoria al 
+                    sistema devolviendo un apuntador a esta."*/
 #include <string.h>    /*Define un tipo de variable, una macro y varias funciones para
-						 manipular arreglos de caracteres. Por ejemplo: strlen "Obtine
-						 la longitud de un arreglo"*/
+                         manipular arreglos de caracteres. Por ejemplo: strlen "Obtine
+                         la longitud de un arreglo"*/
 #include <netinet/in.h> /*Define la familia de direcciones de internet*/
 #include <netinet/ip_icmp.h>  /*Definiciones del protocolo ICMP.*/
 #include <netinet/udp.h>   /*Definiciones para encabezados UDP*/
@@ -17,23 +17,26 @@
 #include <netinet/ip.h>    /*Definiciones para encabezados IP*/
 #include <netinet/if_ether.h>  /*Mapea una dirección IP multicast a Ethernet multicast*/
 #include <net/ethernet.h>  /*Definiciones para encabezados Ethernet*/
-#include <sys/socket.h>		/*Manipulacion de Sockets*/
-#include <arpa/inet.h>	/*Definiciones para operaciones de internet*/
-#include <sys/ioctl.h>	/*Manipula los parámetros subyacentes de archivos especiales*/
-#include <sys/time.h>	/*Tipos de tiempo*/
-#include <sys/types.h>	/*Tipos de datos. Por ejemplo los usados en sys/socket.h y
-						 netinet/in.h */
+#include <sys/socket.h>     /*Manipulacion de Sockets*/
+#include <arpa/inet.h>  /*Definiciones para operaciones de internet*/
+#include <sys/ioctl.h>  /*Manipula los parámetros subyacentes de archivos especiales*/
+#include <sys/time.h>   /*Tipos de tiempo*/
+#include <sys/types.h>  /*Tipos de datos. Por ejemplo los usados en sys/socket.h y
+                         netinet/in.h */
 #include <unistd.h> /*Cabecera define constantes y tipos simbólicos diversos, y 
-						declara funciones auxiliares*/
+                        declara funciones auxiliares*/
+#include "libscan.h"                         
 //////////////////////////////////////
 /*Funciones de utilidad*/
+                         /*
+int scanIPS();                         
 void ProcessPacket(unsigned char* , int);
 void print_ip_header(unsigned char* , int);
 void print_tcp_packet(unsigned char * , int );
 void print_udp_packet(unsigned char * , int );
 void print_icmp_packet(unsigned char* , int );
 void PrintData (unsigned char* , int);
-
+*/
 /////////////////////////////////////
 FILE *logfile;
 
@@ -44,19 +47,22 @@ FILE *logfile;
  int tcp = 0, udp = 0, icmp = 0, others = 0, igmp = 0, total = 0, i, j;
 
 
- int main(int argc, char *argv[])
- {
- 	/*Creacioón de variables que almacenan la direccion de 
- 	origen y el tamaño de datos. */
- 	int saddr_size , data_size;
 
- 	/*Crea la estructura de socket */
- 	struct sockaddr saddr;
 
- 	/*Crea un buffer para almacenar el mensaje 65536 bytes*/
- 	unsigned char *buffer = (unsigned char *) malloc(65536);
 
- 	logfile=fopen("log.txt","w");
+int scanIPS()
+{
+    /*Creacioón de variables que almacenan la direccion de 
+    origen y el tamaño de datos. */
+    int saddr_size , data_size;
+
+    /*Crea la estructura de socket */
+    struct sockaddr saddr;
+
+    /*Crea un buffer para almacenar el mensaje 65536 bytes*/
+    unsigned char *buffer = (unsigned char *) malloc(65536);
+
+    logfile=fopen("log.txt","w");
     if(logfile==NULL) 
     {
         printf("Unable to create log.txt file.");
@@ -64,16 +70,16 @@ FILE *logfile;
 
 
  /*Inicia captura de paquetes*/
- 	printf("Starting...\n");
+    printf("Starting...\n");
 
- 	/*Crea un socket RAW*/
- 	int sock_raw = socket( AF_PACKET, /*Corresponde a capa 2*/
- 							SOCK_RAW, /*Conector puro #3*/
- 							htons(ETH_P_ALL));/*Para recibir todos 
- 												los protocolos*/
+    /*Crea un socket RAW*/
+    int sock_raw = socket( AF_PACKET, /*Corresponde a capa 2*/
+                            SOCK_RAW, /*Conector puro #3*/
+                            htons(ETH_P_ALL));/*Para recibir todos 
+                                                los protocolos*/
 
- 	/*Comprobando la apertura correcta del socket*/
- 	if(sock_raw < 0)
+    /*Comprobando la apertura correcta del socket*/
+    if(sock_raw < 0)
     {
         perror("Socket Error");
         return 1;
@@ -81,14 +87,14 @@ FILE *logfile;
     /*Ciclo que recibe datos del socket abierto*/
     while(1)
     {
-    	/*Obtiene el tamaño de momoria de la estructura */
+        /*Obtiene el tamaño de momoria de la estructura */
         saddr_size = sizeof saddr;
         /*Recibe paquetes:  recvfrom(int sockfd, 
                                      void *buf, 
                                      size_t len, 
                                      int flags,
-                 					 struct sockaddr *src_addr, 
-                 					 socklen_t *addrlen);*/
+                                     struct sockaddr *src_addr, 
+                                     socklen_t *addrlen);*/
         data_size = recvfrom(sock_raw , buffer , 65536 , 0 , &saddr , (socklen_t*)&saddr_size);
         /*Comprobar que se reciben datos*/
         if(data_size <0 )
@@ -100,11 +106,10 @@ FILE *logfile;
         ProcessPacket(buffer , data_size);
     }
     /*Cerrando socket*/
- 	close(sock_raw);
+    close(sock_raw);
     printf("Finished");
     return 0;
- }
-
+}
 
 void ProcessPacket(unsigned char* buffer, int size)
 {
@@ -122,7 +127,7 @@ void ProcessPacket(unsigned char* buffer, int size)
  __u32   daddr;
 *///////////////////////////////////////
     struct iphdr *iph = (struct iphdr*)(buffer + 
-    						sizeof(struct ethhdr));
+                            sizeof(struct ethhdr));
     /*Aumenta el numero de paquetes procesados*/
     ++total;
     fprintf(logfile , "%i;", total);
@@ -167,7 +172,7 @@ void print_ethernet_header(unsigned char* Buffer, int Size)
     fprintf(logfile , "   |-Destination Address : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_dest[0] , eth->h_dest[1] , eth->h_dest[2] , eth->h_dest[3] , eth->h_dest[4] , eth->h_dest[5] );
     fprintf(logfile , "   |-Source Address      : %.2X-%.2X-%.2X-%.2X-%.2X-%.2X \n", eth->h_source[0] , eth->h_source[1] , eth->h_source[2] , eth->h_source[3] , eth->h_source[4] , eth->h_source[5] );
     fprintf(logfile , "   |-Protocol            : %u \n",(unsigned short)eth->h_proto);
-	*/    
+    */    
     fprintf(logfile , "dst:%.2X-%.2X-%.2X-%.2X-%.2X-%.2X", eth->h_dest[0] , eth->h_dest[1] , eth->h_dest[2] , eth->h_dest[3] , eth->h_dest[4] , eth->h_dest[5] );
     fprintf(logfile , ";src:%.2X-%.2X-%.2X-%.2X-%.2X-%.2X", eth->h_source[0] , eth->h_source[1] , eth->h_source[2] , eth->h_source[3] , eth->h_source[4] , eth->h_source[5] );    
 
