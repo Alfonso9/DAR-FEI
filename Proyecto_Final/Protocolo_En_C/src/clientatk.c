@@ -137,7 +137,6 @@ int main(int argc, char * argv[])
 							int j = 0;
 							while(j < i)
 							{			
-								usleep(1);
 								//printf("Mensaje %i: %s\n", j,arregloatk[j]->msg);		
 								struct atak msgAtak;
 								memcpy(&msgAtak, arregloatk[j], (int) 103);
@@ -276,10 +275,10 @@ int main(int argc, char * argv[])
 					cond = false;
 					continue;
 			}
-	    }
-	    close(sockfd);
+	    }	    
 		usleep(5000000);
 	}
+	close(sockfd);
 	return 0;	
 }
 
