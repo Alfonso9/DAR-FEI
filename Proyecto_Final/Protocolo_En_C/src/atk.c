@@ -26,6 +26,11 @@ int main(int argc, char * argv[])
         exit(1);
     }
 
+    if (argc < 3) {
+       fprintf(stderr,"usage %s hostname port\n", argv[0]);
+       exit(0);
+    }
+
 	int sockfd, newsockfd, portno, n;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
@@ -88,15 +93,15 @@ int main(int argc, char * argv[])
 			/*------------------------------*/
 			
 /********* Recibiendo de la INTERFAZ ***************/
- /*       	int sockdvc, newsockdvc, portnodvc, ndvc;
+        	int sockdvc, newsockdvc, portnodvc;
 		    socklen_t clilent;
 		    struct sockaddr_in serv_addrdvc, cli_addrdvc;				    
 
 		    bzero((char *) &serv_addrdvc, sizeof(serv_addrdvc));
 			/*------------------------------*/
 			/*----------- Servidor ---------*/
-			/*------------------------------*/
-	/*		sockdvc = socket(AF_INET, SOCK_STREAM, 0);
+			/*------------------------------*/			
+			sockdvc = socket(AF_INET, SOCK_STREAM, 0);
 		    
 		    if (sockdvc < 0)
 		    {
@@ -104,12 +109,13 @@ int main(int argc, char * argv[])
 		        exit(1);
 		    }
 
-		    portnodvc = 10000;
+		    portnodvc = atoi(argv[2]);
+		    //portnodvc = 10000;
 		    serv_addrdvc.sin_port = htons(portnodvc);
 		    serv_addrdvc.sin_family = AF_INET;
 		    serv_addrdvc.sin_addr.s_addr = INADDR_ANY;    
 
-		     if (bind(sockdvc, (struct sockaddr *) &serv_addrdvc, sizeof(serv_addrdvc)) < 0) 
+		    if (bind(sockdvc, (struct sockaddr *) &serv_addrdvc, sizeof(serv_addrdvc)) < 0) 
 		    {
 		        perror("ERROR on binding INTERFAZ");
 		        exit(1);
@@ -123,7 +129,7 @@ int main(int argc, char * argv[])
 		    /*------------------------------*/
 			/*----------- Cliente ----------*/
 			/*------------------------------*/    
-/*		    clilent = sizeof(cli_addrdvc);
+		    clilent = sizeof(cli_addrdvc);
 		    newsockdvc = accept(sockdvc, (struct sockaddr *) &cli_addrdvc, &clilent);
 		    if (newsockdvc < 0) 
 		    {
@@ -134,7 +140,7 @@ int main(int argc, char * argv[])
 			
 		    /*Recibiendo Solicitud desde INTERFAZ*/
 
-	/*		printf("%s\n", "Recibiendo ACK...");				
+			printf("%s\n", "Recibiendo ACK...");				
 			n = read(newsockdvc,buffer,103);
 	        if (n < 0)
 	        { 
@@ -143,21 +149,27 @@ int main(int argc, char * argv[])
 	        }	        
 	        bzero(&msgAtak, sizeof(msgAtak));
 	        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
-
-	        close(sockdvc);	
-	    	close(newsockdvc);
+	        /*close(sockdvc);	
+	    	close(newsockdvc);		
 			/*Recibiendo Solicitud desde INTERFAZ*/
 
-/********* Recibiendo de la INTERFAZ ***************/
-	        
-			int op ;//= msgAtak.type;			
-			printf("Read Option: \n");
-			scanf("%d",&op);
+/********* Recibiendo de la INTERFAZ ***************/	        
+
+			int op = msgAtak.type;			
+			//printf("Read Option: \n");
+			//scanf("%d",&op);
 			bzero(&msgAtak, sizeof(msgAtak));	
 			printf("OP is: %i\n", op);
 	    	switch(op)
 			{
+
 				case 1:				
+					/*Si funcionan aqui el cierre de los descriptores INTERFAZ*/
+					/*printf("Mensaje: %s\n", "DEPURACION");		
+					close(sockdvc);	
+	    			close(newsockdvc);
+	    			/*Si funcionan aqui el cierre de los descriptores INTERFAZ*/
+
 					/*Enviando solicitud*/
 					printf("%s\n", "Enviando solicitud...");
 					msgAtak.type = 1;
@@ -175,6 +187,11 @@ int main(int argc, char * argv[])
 					}				
 					/*Enviando solicitud*/
 
+					/*Si funcionan aqui el cierre de los descriptores INTERFAZ*/
+					/*printf("Mensaje: %s\n", "DEPURACION");		
+					close(sockdvc);	
+	    			close(newsockdvc);
+	    			/*Si funcionan aqui el cierre de los descriptores INTERFAZ*/	    							
 
 					/*Recibiendo ACK de solicitud recibida*/
 					printf("%s\n", "Recibiendo ACK...");				
@@ -187,22 +204,22 @@ int main(int argc, char * argv[])
 			        bzero(&msgAtak, sizeof(msgAtak));
 			        memcpy(&msgAtak, buffer, (int) sizeof(msgAtak));
 			        /*Recibiendo ACK de solicitud recibida*/
-
-					/**RESPUESTA A INTERFAZ*/
+			        printAtakMsg(&msgAtak);	
+			        
+					/**RESPUESTA DE SOLICITUD EN PROCESO A INTERFAZ*/
 					/*n = write(newsockdvc, buffer, sizeof(buffer));							
 			        if (n < 0)
 			        { 
 			            perror("ERROR writing to socket INTERFAZ");
 			            exit(1);
-					}*/	
-										    							
-					/**RESPUESTA A INTERFAZ*/
-
-			        printAtakMsg(&msgAtak);		
+					}*/										
+					/**RESPUESTA DE SOLICITUD EN PROCESO A INTERFAZ*/
+			        
 			        /*Comprobando el ACK y preparandose para recibir*/
 			        if(msgAtak.ack == 1)
 			        {
 			        	int i, count = msgAtak.count;	
+			        	bzero(&msgAtak, sizeof(msgAtak));
 
 			        	/*Enviando ACK de Enterado*/
 			        	printf("%s\n", "Enviando ACK de Enterado..");		        	
@@ -243,7 +260,7 @@ int main(int argc, char * argv[])
 					        { 
 					            perror("ERROR writing to socket INTERFAZ");
 					            exit(1);
-							}*/																			
+							}																		
 							/**RESPUESTA A INTERFAZ*/
 
 							printf("WRITE RETURN: %i\n", n);
@@ -280,8 +297,8 @@ int main(int argc, char * argv[])
 			        	msj -= (count * 100);
 			        	printf("Mensaje: %s\n", msj);
 
-			        }		        			        			        
-			        //printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);		        
+			        }				        	
+			        //printf("Mensaje recibido:\n\t%s\n", msgAtak.msg);			        	
 					break;
 				case 2:
 					/*Enviando solicitud*/
@@ -432,10 +449,13 @@ int main(int argc, char * argv[])
 				default:
 					cond = false;
 					break;			
+
 			}   		     		
 		    /*------------------------------*/
 			/*----------- Envío ------------*/
-			/*------------------------------*/			
+			/*------------------------------*/	
+			msj = NULL;				
+
 		}	
 		
 		close(newsockfd);
