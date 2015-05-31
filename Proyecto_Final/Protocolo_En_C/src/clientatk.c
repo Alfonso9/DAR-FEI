@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "libscan.h"
+#include "libs/libscan.h"
 
 struct atak
 {
@@ -178,8 +178,9 @@ int main(int argc, char * argv[])
 					printf("%s\n", "SCAN IP'S");
 					/*------------------------------------------*/
 					char * messageb = SCANIPS();	
+					printf("MENSAJES..: %s\n", messageb);
 					int ib;
-					struct atak ** arregloatkb = partirMensaje(message, 1, &i);		
+					struct atak ** arregloatkb = partirMensaje(messageb, 2, &ib);		
 					free(messageb);
 					printf("%i\n", ib);
 					/*------------------------------------------*/	
@@ -188,7 +189,7 @@ int main(int argc, char * argv[])
 					{			
 						/*Respondiendo con ACK a Solicitud*/
 						printf("%s\n", "Respondiendo con ACK solicitud...");
-						msgAtakrecv.type = 1;
+						msgAtakrecv.type = 2;
 						msgAtakrecv.count = ib;
 						msgAtakrecv.ack = 1;
 						strncpy(msgAtakrecv.msg, "Respondiendo", 12);				
@@ -214,21 +215,22 @@ int main(int argc, char * argv[])
 						/*Recibiendo ACK de enterado*/
 						printAtakMsg(&msgAtakrecv);
 						printf("%s\n", "Enviando paquetes...");
+
 						if (msgAtakrecv.ack == 1)
-						{
+						{							
 							enteradob = true;
 							int jb = 0;
-							while(jb < i)
+							while(jb < ib)
 							{			
-								usleep(1);
-								//printf("Mensaje %i: %s\n", j,arregloatk[j]->msg);		
-								struct atak msgAtak;
-								memcpy(&msgAtak, arregloatk[jb], (int) 103);
+								usleep(1);										
+								struct atak msgAtak;								
+								bzero(&msgAtak, sizeof(struct atak));								
+								memcpy(&msgAtak, arregloatkb[jb], (int) 103);								
 								printAtakMsg(&msgAtak);
 								memcpy(buffer, &msgAtak, (int) 103);
 								struct atak msgAtaka;
 								memcpy(&msgAtaka, buffer, (int) 103);				
-								//printAtakMsg(&msgAtaka);
+								//printAtakMsg(&msgAtaka);								
 								n = write(sockfd, buffer, 103);
 								//printf("WRITE RETURN: %i BUFFER: %s\n", n, buffer);
 						        if (n < 0)
@@ -335,7 +337,7 @@ char * GET()
 struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo)
 {	
 	int partes = (strlen(msj)/100);
-	if (strlen(msj)/100 > 0)
+	if (strlen(msj)%100 > 0)
 	{
 			partes++;
 	}	
@@ -349,7 +351,6 @@ struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo)
 		arreglo[i]->count = i+1;
 		arreglo[i]->ack = 0;
 		strncpy(arreglo[i]->msg, msj ,100);
-		//printf("%i -- %s\n", msj, msj);
 		msj += 100;
 	}	
 	/*for (i = 0; i < partes; ++i)
@@ -362,7 +363,37 @@ struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo)
 
 char * SCANIPS()
 {	
-	scanIPS();
-	char * servreq = malloc(10000);	
-    return servreq;
+	int n = scanIPS(100);
+	if (n == 0)
+	{
+		FILE * fTemp = fopen("log.txt", "r");
+		size_t pos = ftell(fTemp);    // Current position
+		fseek(fTemp, 0, SEEK_END);    // Go to end
+		size_t tam = ftell(fTemp); // read the position which is the size
+		fseek(fTemp, pos, SEEK_SET);
+		char * buffer;	
+			/* allocate memory for entire content */
+		buffer = calloc( 1, tam+1 );
+		if( !buffer ) 
+		{
+			fclose(fTemp);
+			fputs("memory alloc fails",stderr);
+			exit(1);
+		}
+		/* copy the file into the buffer */
+		if(1 != fread( buffer , tam, 1 , fTemp))
+		{
+		  	fclose(fTemp);
+		  	free(buffer);
+		  	fputs("entire read fails",stderr);
+		  	exit(1);
+		}
+		fclose(fTemp);	  	
+		return buffer;		
+	}
+	if (n == 1)
+	{
+		char * servreq = "ERROR IN SCANIPS";
+		return servreq;	
+	}    
 }

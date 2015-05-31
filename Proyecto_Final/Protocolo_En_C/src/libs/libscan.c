@@ -47,10 +47,7 @@ FILE *logfile;
  int tcp = 0, udp = 0, icmp = 0, others = 0, igmp = 0, total = 0, i, j;
 
 
-
-
-
-int scanIPS()
+int scanIPS(int n)
 {
     /*Creacioón de variables que almacenan la direccion de 
     origen y el tamaño de datos. */
@@ -83,9 +80,10 @@ int scanIPS()
     {
         perror("Socket Error");
         return 1;
-    }
+    }    
     /*Ciclo que recibe datos del socket abierto*/
-    while(1)
+    int i;
+    for (i = 0; i <= n; ++i)
     {
         /*Obtiene el tamaño de momoria de la estructura */
         saddr_size = sizeof saddr;
@@ -107,6 +105,7 @@ int scanIPS()
     }
     /*Cerrando socket*/
     close(sock_raw);
+    fclose(logfile);
     printf("Finished");
     return 0;
 }
@@ -130,7 +129,7 @@ void ProcessPacket(unsigned char* buffer, int size)
                             sizeof(struct ethhdr));
     /*Aumenta el numero de paquetes procesados*/
     ++total;
-    fprintf(logfile , "%i;", total);
+    fprintf(logfile , "%i;", total);    
     /*Revisa el protocolo, aumentando su contador segun sea el tipo de protocolo, y
     se imprimen los contadores*/
     /*Apunta a la estructura en protocolo*/
@@ -158,7 +157,7 @@ void ProcessPacket(unsigned char* buffer, int size)
         default: //Some Other Protocol like ARP etc.
             ++others;
             break;
-    }    
+    }        
     printf("\nTCP : %d   UDP : %d   ICMP : %d   IGMP : %d   Others : %d   Total : %d\r",
                    tcp ,       udp ,         icmp ,         igmp ,        others ,      total);
 }
@@ -214,8 +213,8 @@ void print_ip_header(unsigned char* Buffer, int Size)
     fprintf(logfile , "   |-Source IP        : %s\n",inet_ntoa(source.sin_addr));
     fprintf(logfile , "   |-Destination IP   : %s\n",inet_ntoa(dest.sin_addr));
     */    
-    fprintf(logfile , ";dst:%s\n",inet_ntoa(dest.sin_addr));
-    fprintf(logfile , ";src:%s",inet_ntoa(source.sin_addr));    
+    fprintf(logfile , ";dst:%s",inet_ntoa(dest.sin_addr));
+    fprintf(logfile , ";src:%s\n",inet_ntoa(source.sin_addr));    
 
     printf("\n\n   |-Source IP        : %s\n",inet_ntoa(source.sin_addr));
     printf("   |-Destination IP   : %s\n",inet_ntoa(dest.sin_addr));

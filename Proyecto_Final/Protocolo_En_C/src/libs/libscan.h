@@ -3,7 +3,7 @@
 
 /*Las lineas anteriores siempre van y se nombran segun el nombre que se le
  haya dado al archivo pero en mayúsculas*/
-extern int scanIPS();
+extern int scanIPS(int n);
 
 extern void ProcessPacket(unsigned char* , int);
 extern void print_ip_header(unsigned char* , int);

@@ -87,8 +87,8 @@ int main(int argc, char * argv[])
 			/*----------- Envío ------------*/
 			/*------------------------------*/
 			
-			/********* Recibiendo de la INTERFAZ ***************/
-        	int sockdvc, newsockdvc, portnodvc, ndvc;
+/********* Recibiendo de la INTERFAZ ***************/
+ /*       	int sockdvc, newsockdvc, portnodvc, ndvc;
 		    socklen_t clilent;
 		    struct sockaddr_in serv_addrdvc, cli_addrdvc;				    
 
@@ -96,7 +96,7 @@ int main(int argc, char * argv[])
 			/*------------------------------*/
 			/*----------- Servidor ---------*/
 			/*------------------------------*/
-			sockdvc = socket(AF_INET, SOCK_STREAM, 0);
+	/*		sockdvc = socket(AF_INET, SOCK_STREAM, 0);
 		    
 		    if (sockdvc < 0)
 		    {
@@ -123,7 +123,7 @@ int main(int argc, char * argv[])
 		    /*------------------------------*/
 			/*----------- Cliente ----------*/
 			/*------------------------------*/    
-		    clilent = sizeof(cli_addrdvc);
+/*		    clilent = sizeof(cli_addrdvc);
 		    newsockdvc = accept(sockdvc, (struct sockaddr *) &cli_addrdvc, &clilent);
 		    if (newsockdvc < 0) 
 		    {
@@ -131,9 +131,10 @@ int main(int argc, char * argv[])
 		          exit(1);
 		    }
 			printf("%s\n", "Cliente conectado");
-
+			
 		    /*Recibiendo Solicitud desde INTERFAZ*/
-			printf("%s\n", "Recibiendo ACK...");				
+
+	/*		printf("%s\n", "Recibiendo ACK...");				
 			n = read(newsockdvc,buffer,103);
 	        if (n < 0)
 	        { 
@@ -147,9 +148,11 @@ int main(int argc, char * argv[])
 	    	close(newsockdvc);
 			/*Recibiendo Solicitud desde INTERFAZ*/
 
-	        /********* Recibiendo de la INTERFAZ ***************/
+/********* Recibiendo de la INTERFAZ ***************/
 	        
-			int op = msgAtak.type;			
+			int op ;//= msgAtak.type;			
+			printf("Read Option: \n");
+			scanf("%d",&op);
 			bzero(&msgAtak, sizeof(msgAtak));	
 			printf("OP is: %i\n", op);
 	    	switch(op)
@@ -161,7 +164,7 @@ int main(int argc, char * argv[])
 					msgAtak.count = 1;
 					msgAtak.ack = 0;
 					strncpy(msgAtak.msg, "Solicitando", 12);
-					printf("Tamaño: %i\n", (int) sizeof(msgAtak));
+					printf("Tamaño: %i\n", (int)sizeof(msgAtak));
 					printf("%s\n", "GET");				
 					memcpy(buffer, &msgAtak, sizeof(msgAtak));
 					n = write(newsockfd,buffer,strlen(buffer));							
@@ -199,9 +202,7 @@ int main(int argc, char * argv[])
 			        /*Comprobando el ACK y preparandose para recibir*/
 			        if(msgAtak.ack == 1)
 			        {
-			        	int i, count = msgAtak.count;
-			        	char * mensaje = malloc(count * 100);
-			        	printf("Tamaño de msj: %s\n", mensaje);	
+			        	int i, count = msgAtak.count;	
 
 			        	/*Enviando ACK de Enterado*/
 			        	printf("%s\n", "Enviando ACK de Enterado..");		        	
@@ -327,13 +328,11 @@ int main(int argc, char * argv[])
 			        /*Comprobando el ACK y preparandose para recibir*/
 			        if(msgAtak.ack == 1)
 			        {
-			        	int ib, countb = msgAtak.count;
-			        	char * mensajeb = malloc(countb * 100);
-			        	printf("Tamaño de msj: %s\n", mensajeb);	
+			        	int ib, countb = msgAtak.count;	
 
 			        	/*Enviando ACK de Enterado*/
 			        	printf("%s\n", "Enviando ACK de Enterado..");		        	
-			        	msgAtak.type = 1;
+			        	msgAtak.type = 2;
 						msgAtak.count = 1;
 						msgAtak.ack = 1;
 						strncpy(msgAtak.msg, "Enterado", 11);
@@ -349,7 +348,7 @@ int main(int argc, char * argv[])
 						
 
 						/*Recibiendo paquetes segun el numero a recibir*/
-						printf("%s\n", "Recibiendo mensajes...");
+						printf("%s  %i\n", "Recibiendo mensajes...",countb);
 						msj = malloc((sizeof(msgAtak.msg)*countb));
 						
 
@@ -374,20 +373,18 @@ int main(int argc, char * argv[])
 							/**RESPUESTA A INTERFAZ*/
 
 							printf("WRITE RETURN: %i\n", n);
-
 					        bzero(&msgAtak, sizeof(msgAtak));
 					        memcpy(&msgAtak, buffer, (int) 103);
 					        printAtakMsg(&msgAtak);		
 
-					        printf("Copiando: %i\n", sizeof(msgAtak.msg)); 
+					        printf("Copiando: %i\n", sizeof(msgAtak.msg));
 					        strncpy(msj, msgAtak.msg, 100);				        				        
 					        msj += sizeof(msgAtak.msg);
-					        
 					        usleep(1);
 					        if(msgAtak.ack == 0)
 			        		{
 			        			/*Enviando de Enterado*/
-					        	msgAtak.type = 1;
+					        	msgAtak.type = 2;
 								msgAtak.count = 1;
 								msgAtak.ack = 1;
 								bzero(msgAtak.msg, sizeof(msgAtak.msg));
