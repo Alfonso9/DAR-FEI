@@ -368,7 +368,7 @@ struct atak ** partirMensaje(char * msj, int tipo, int * tamArreglo)
 
 char * SCANIPS()
 {	
-	int n = scanIPS(10);
+	int n = scanIPS(20);
 	if (n == 0)
 	{
 		FILE * fTemp = fopen("log.txt", "r");
