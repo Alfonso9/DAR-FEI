@@ -1,0 +1,13 @@
+gcc -o libscan.o -c libscan.c
+
+gcc clientatk.c -o clientatk libscan.o
+
+
+El error es:
+
+
+
+/tmp/ccAhXPqa.o: In function `SCANIPS':
+clientatk.c:(.text+0x1436): undefined reference to `scanIP'
+collect2: error: ld returned 1 exit status
+
